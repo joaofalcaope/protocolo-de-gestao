@@ -1,4 +1,4 @@
-# Protocolo de Gestão
+# Protocolo de Gestão Curricular
 
 Idealização e coordenação: João Marcos Falcão Perim, professor da rede estadual do Espírito Santo.
 Desenvolvido com apoio de inteligência artificial (Claude, da Anthropic). Ferramenta independente, sem vínculo oficial com a SEDU-ES.
