@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
 <meta name="author" content="João Marcos Falcão Perim">
 <meta name="description" content="Cruza as habilidades de cada componente do Ensino Médio (SEDU-ES 2026) com os descritores de Língua Portuguesa e Matemática do Paebes/AMA e oferece planos de aula e questões prontas.">
 <style>*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
@@ -550,7 +551,16 @@ function renderDesc(){
   renderComp('secMT','MT',current.rows,current.extra);
   updateMeta();
 }
+// assinatura da seleção atual: se mudar, resumo e atividades geradas para a seleção antiga somem
+const selSig = ()=>[state.mod,state.comp,state.serie,state.tri,[...state.habs].sort().join(','),[...state.desc].sort().join(',')].join('|');
+let resSig = null, genSig = null;
+function limparSaidasAntigas(){
+  const sg = selSig();
+  if (resSig!==null && resSig!==sg){ $('resSec').hidden = true; $('resumo').value = ''; resSig = null; }
+  if (genSig!==null && genSig!==sg){ $('outSec').hidden = true; $('out').innerHTML = ''; $('status').textContent = ''; genSig = null; }
+}
 function updateMeta(){
+  limparSaidasAntigas();
   try{ updateBankBtn(); renderMateriais(); }catch(e){ console.error(e); }
   $('dMeta').textContent = state.habs.size ? (state.desc.size ? `${state.desc.size} marcado${state.desc.size===1?'':'s'}` : 'nenhum marcado') : '';
   $('gen').disabled = !state.habs.size;
@@ -611,6 +621,7 @@ async function generate(fresh){
   try{
     let chars = 0;
     const data = await sampleFn.json(prompt,{signal:ctl.signal, cache: fresh?false:true, onText:({text})=>{ chars=text.length; $('status').textContent = `Escrevendo… ${Math.round(chars/100)/10} mil caracteres`; }});
+    genSig = selSig();
     state.lastGen = {data, ctx:{mod:state.mod,comp:state.comp,serie:state.serie,tri:state.tri}};
     renderOut(data); $('status').textContent = '';
   }catch(e){
@@ -694,7 +705,7 @@ function resumo(){
   }
   return L.join('\n');
 }
-$('resumoBtn').onclick = ()=>{ $('resumo').value = resumo(); $('resSec').hidden=false; $('resSec').scrollIntoView({block:'start'}); };
+$('resumoBtn').onclick = ()=>{ $('resumo').value = resumo(); resSig = selSig(); $('resSec').hidden=false; $('resSec').scrollIntoView({block:'start'}); };
 $('copyRes').onclick = e=>copy($('resumo').value, e.currentTarget);
 
 
